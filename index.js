@@ -4,6 +4,9 @@ const port = 8284;
 const path = require('path');
 
 
+//use express router
+app.use('/', require('./routes'));
+
 app.listen(port, function(error) {
 
     if (error) {
@@ -22,3 +25,10 @@ app.listen(port, function(error) {
 
 //for git -  git init
 // for git status
+//for add in git as....
+//PS C:\Users\premn\Desktop\NODEWS\codeial> git add .
+//for add commit
+//PS C:\Users\premn\Desktop\NODEWS\codeial> git commit -m "First commot: create the directory structure and setup express server"
+//for check log
+//PS C:\Users\premn\Desktop\NODEWS\codeial> git log
+//it show commits
