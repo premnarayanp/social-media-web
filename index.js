@@ -5,10 +5,40 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = 8384;
-//const path = require('path');
 
 //6. connect db 
 const db = require('./config/mongoose');
+
+//9 used for session cookie
+const session = require('express-session');
+const passport = require('passport');
+const passportLocal = require('./config/passport-local-strategy');
+
+//12. mongo store for store cookie in mongodb
+const MongoStore = require('connect-mongo')(session);
+//const MongoStore = require('connect-mongo');
+//const MongoStore = require('connect-mongodb-session')
+
+//13- use flash-connect-
+const flash = require('connect-flash');
+const customMiddleware = require('./config/middleware');
+
+/*
+//---------------------------------------------------------------------------------------------
+// 12.  scss
+const sassMiddleware = require('node-sass');
+
+//12. use  sassMiddleware
+app.use(sassMiddleware({
+    src: './assets/scss',
+    dest: './assets/css',
+    debug: true,
+    outputStyle: 'extended',
+    prefix: '/css'
+}));
+
+//------------------------------------------------------------------------------
+*/
 
 //8. use post request  url
 app.use(express.urlencoded());
@@ -29,11 +59,70 @@ app.set('layout extractScripts', true);
 
 
 //1. use express router
-app.use('/', require('./routes'));
+//app.use('/', require('./routes'));
 
 //2. Set Up the view Engine
 app.set('view engine', 'ejs');
 app.set('views', './views');
+
+// mongo store is used to store the session cookie in the db
+// 10. use session---------
+
+
+/*let store = new MongoStore({
+    mongooseConnection: db,
+    collection: "sessions" 
+});
+ 
+app.use(session({
+    secret: 'blahsomething',
+    resave: false,
+    store: store,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 24 hours
+}));
+
+*/
+
+
+
+app.use(session({
+    name: 'codeial',
+    // TODO change the secret before deployment in production mode
+    secret: 'blahsomething',
+    saveUninitialized: false,
+
+    resave: false,
+    cookie: {
+        maxAge: (1000 * 60 * 100)
+    },
+    store: new MongoStore({
+            mongooseConnection: db,
+            autoRemove: 'disabled'
+
+        },
+        function(err) {
+            console.log(err || 'connect-mongodb setup ok');
+        }
+    )
+}));
+
+//PS C:\Users\premn\Desktop\NODEWS\codeial> npm install connect-mongodb-session
+//https://stackoverflow.com/questions/66388523/error-cannot-init-client-mongo-connect-express-session
+// 11. use pass...
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(passport.setAuthenticatedUser);
+
+//13-use flash-connect
+app.use(flash());
+
+//14- use custom middleware for set flash massage
+app.use(customMiddleware.setFlash);
+
+//1. use express router
+app.use('/', require('./routes'));
 
 
 app.listen(port, function(error) {
@@ -43,6 +132,7 @@ app.listen(port, function(error) {
     }
     console.log(`Server is running on port: ${port}`);
 });
+
 
 
 //--------------------imp command-----------------------------------
@@ -195,3 +285,89 @@ app.listen(port, function(error) {
 //----------------urlencoded for post request------------
 // use post request  url
 //app.use(express.urlencoded());
+
+//==================cookie using library===========================================
+
+
+//-------------------cookie- using  passport-local-strategy----------------
+//1. install passport...
+//PS C:\Users\premn\Desktop\NODEWS\codeial> npm install passport
+
+//2. install passport-local
+//PS C:\Users\premn\Desktop\NODEWS\codeial> npm install passport-local
+
+//3. create js  file in config folder name as..passport-local-strategy.js
+
+//4........
+
+
+//-----------------and create session  using express session api---------------
+//instal session 
+//PS C:\Users\premn\Desktop\NODEWS\codeial> npm install express-session 
+//or
+//PS C:\Users\premn\Desktop\NODEWS\codeial> npm install session
+//or
+//PS C:\Users\premn\Desktop\NODEWS\codeial> npm install express session
+
+
+//-----------------------------------------------------------------------
+//install  connect-mongo  for store cookie in mongodb
+//PS C:\Users\premn\Desktop\NODEWS\codeial> npm install connect-mongo
+
+
+//-----if it give Error as  'MongoStore require new keyword' or ......then--- uninstall and -change version and reinstall
+//uninstall
+//npm uninstall connect-mongo
+//reinstall version
+//npm i connect-mongo@3
+//otherwise new version has difference connectivity rules....go through
+//https://stackoverflow.com/questions/66388523/error-cannot-init-client-mongo-connect-express-session
+//or check or install new other package as
+//PS C:\Users\premn\Desktop\NODEWS\codeial> npm install connect-mongodb-session
+
+//=================install scss===================================
+//1. PS C:\Users\premn\Desktop\NODEWS\codeial> npm install node-sass-middleware
+// that show error ,version incompatibility..so used....
+
+//PS C:\Users\premn\Desktop\NODEWS\codeial> npm install node-sass  Or npm install sass
+//or for global 
+//PS C:\Users\premn\Desktop\NODEWS\codeial> npm install -g sass
+//if globally  installed then need to import it on project so.....
+//PS C:\Users\premn\Desktop\NODEWS\codeial> npm install --save-dev sass
+// create css and scss folder in assets
+//add these code in package.json file in script tag as...
+//"scss": "sass --watch assets/scss:assets/css"
+//to run used as.... npm run scss    
+//Notes:- after run each scss file converted in css in css folder.
+
+//2. create scss folder in assets
+// create file with .scss extension
+
+//3. create css folder in assets
+//auto created css file
+
+//4. after run ,npm run scss
+//[2023-03-11 21:57] Compiled assets\scss\footer.scss to assets\css\footer.css.
+// [2023-03-11 21:57] Compiled assets\scss\header.scss to assets\css\header.css.
+// [2023-03-11 21:57] Compiled assets\scss\home.scss to assets\css\home.css.
+// [2023-03-11 21:57] Compiled assets\scss\layout.scss to assets\css\layout.css.
+// [2023-03-11 21:57] Compiled assets\scss\user_profile.scss to assets\css\user_profile.css.
+// Sass is watching for changes. Press Ctrl-C to stop.
+
+//auto run with server as....
+//https://dev.to/elvelive/setting-up-sass-in-an-express-app-jk4
+//https://srinivasankk.com/npm-scripts-with-and-operators/.
+
+
+//=========================Covert in async await====================================
+// async function (){
+// await call();
+//function call using await
+//}
+
+//=============Use flash-connect for send text message for client===================
+
+
+//==========================use noty.js for animated tex message for client======================
+//add cdn ...
+//https://cdnjs.com/libraries/noty

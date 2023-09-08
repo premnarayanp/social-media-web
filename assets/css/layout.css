@@ -1,5 +1,12 @@
 body {
     margin: 0;
-    background-color: brown;
     /* text-align: center; */
 }
+
+body #layout-main {
+    height: 100%;
+    background-color: rgb(245, 240, 240);
+}
+
+
+/*# sourceMappingURL=layout.css.map */
