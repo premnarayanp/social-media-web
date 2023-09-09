@@ -1,10 +1,12 @@
+require('dotenv').config()
+const port = process.env.PORT || 8384;
+
 const express = require('express');
 
 //7.  require cookie-parser
 const cookieParser = require('cookie-parser');
 
 const app = express();
-const port = 8384;
 
 //6. connect db 
 const db = require('./config/mongoose');
